@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votação</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_urna.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Votação</h1>
+        <form method="POST" action="{{ url_for('votar') }}">
+            <p>Classifique os candidatos em ordem de preferência (1º ao 5º lugar):</p>
+            <ul>
+                {% for i in range(1, 6) %}
+                <li>
+                    <label for="preferencia_{{ i }}">Preferência {{ i }}:</label>
+                    <select name="preferencia" id="preferencia_{{ i }}" required>
+                        {% for candidato in candidatos %}
+                        <option value="{{ candidato[0] }}">{{ candidato[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </li>
+                {% endfor %}
+            </ul>
+            <button type="submit">Votar</button>
+        </form>
+
+        <a href="{{ url_for('index') }}">Voltar ao Início</a>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
