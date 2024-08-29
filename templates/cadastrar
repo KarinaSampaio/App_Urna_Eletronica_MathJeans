@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Candidato</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_urna.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastrar Candidato</h1>
+        <form method="POST" action="{{ url_for('cadastrar') }}">
+            <label for="nome">Nome do Candidato:</label>
+            <input type="text" name="nome" id="nome" required>
+            <button type="submit">Cadastrar</button>
+        </form>
+
+        <h2>Candidatos Cadastrados</h2>
+        <ul>
+            {% for candidato in candidatos %}
+            <li>
+                {{ candidato[1] }}
+                <form method="POST" action="{{ url_for('excluir', id=candidato[0]) }}" style="display:inline;">
+                    <button type="submit" class="danger">Excluir</button>
+                </form>
+                <form method="POST" action="{{ url_for('renomear', id=candidato[0]) }}" style="display:inline;">
+                    <input type="text" name="novo_nome" placeholder="Novo Nome" required>
+                    <button type="submit" class="warning">Renomear</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <a href="{{ url_for('index') }}">Voltar ao Início</a>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
