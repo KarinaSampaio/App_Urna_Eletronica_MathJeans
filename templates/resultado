@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado da Votação</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_urna.css') }}">
+</head>
+<body>
+    <div class="container resultado-page resultados">
+        <h1>Resultado da Votação</h1>
+
+        <p>Total de Pontos Máximos (TPM): {{ tpm }}</p>
+
+        <ul>
+            {% for resultado in resultados %}
+            <li>{{ resultado[0] }}: {{ resultado[1] }} pontos ({{ '%.2f' % resultado[2] }}%)</li>
+            {% endfor %}
+        </ul>
+
+        <a href="{{ url_for('index') }}">Voltar ao Início</a>
+    </div>
+</body>
+</html>
