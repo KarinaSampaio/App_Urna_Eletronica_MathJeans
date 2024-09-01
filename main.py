@@ -147,4 +147,5 @@ def resultado():
 # Inicialização do servidor Flask
 if __name__ == '__main__':
     criar_banco_de_dados()  # Recriar o banco de dados ao iniciar o servidor
-    port = int(os.environ.get('PORT', 5000))  # Captura a por
+    port = int(os.environ.get('PORT', 5000))  # Captura a porta configurada pelo ambiente
+    app.run(host='0.0.0.0', port=port)  # Executa o servidor Flask na porta correta
