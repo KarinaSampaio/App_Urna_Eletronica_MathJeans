@@ -1,66 +1,49 @@
 import os
-import logging
 from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
-# Configurando logging
-logging.basicConfig(level=logging.INFO)
-
 # Função para criar o banco de dados e as tabelas
 def criar_banco_de_dados():
-    try:
-        conn = sqlite3.connect('urna_eletronica.db')
-        cursor = conn.cursor()
+    conn = sqlite3.connect('urna_eletronica.db')
+    cursor = conn.cursor()
 
-        # Criação da tabela de candidatos
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS candidatos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT NOT NULL
-            )
-        ''')
+    # Criação da tabela de candidatos
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS candidatos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL
+        )
+    ''')
 
-        # Criação da tabela de votos
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS votos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                candidato_id INTEGER NOT NULL,
-                preferencia INTEGER NOT NULL,
-                FOREIGN KEY (candidato_id) REFERENCES candidatos(id)
-            )
-        ''')
+    # Criação da tabela de votos
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS votos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            candidato_id INTEGER NOT NULL,
+            preferencia INTEGER NOT NULL,
+            FOREIGN KEY (candidato_id) REFERENCES candidatos(id)
+        )
+    ''')
 
-        conn.commit()
-        conn.close()
-        logging.info("Banco de dados criado com sucesso.")
-    except sqlite3.Error as e:
-        logging.error(f"Erro ao criar banco de dados: {e}")
+    conn.commit()
+    conn.close()
 
 # Função para obter conexão com o banco de dados
 def get_db_connection():
-    try:
-        conn = sqlite3.connect('urna_eletronica.db')
-        return conn
-    except sqlite3.Error as e:
-        logging.error(f"Erro ao conectar ao banco de dados: {e}")
-        return None
+    return sqlite3.connect('urna_eletronica.db')
 
 # Página inicial
 @app.route('/')
 def index():
-    logging.info("Página inicial acessada")
     return render_template('index.html')
 
 # Página de cadastro de candidatos
 @app.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
     conn = get_db_connection()
-    if conn is None:
-        return "Erro ao conectar ao banco de dados.", 500
-
     cursor = conn.cursor()
 
     if request.method == 'POST':
@@ -83,9 +66,6 @@ def cadastrar():
 @app.route('/excluir/<int:id>', methods=['POST'])
 def excluir(id):
     conn = get_db_connection()
-    if conn is None:
-        return "Erro ao conectar ao banco de dados.", 500
-
     cursor = conn.cursor()
 
     # Excluir o candidato
@@ -101,9 +81,6 @@ def renomear(id):
     novo_nome = request.form['novo_nome']
     if novo_nome:
         conn = get_db_connection()
-        if conn is None:
-            return "Erro ao conectar ao banco de dados.", 500
-
         cursor = conn.cursor()
 
         # Renomear o candidato
@@ -119,14 +96,11 @@ def renomear(id):
 @app.route('/votar', methods=['GET', 'POST'])
 def votar():
     conn = get_db_connection()
-    if conn is None:
-        return "Erro ao conectar ao banco de dados.", 500
-
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM candidatos")
     candidatos = cursor.fetchall()
 
-    if request.method == 'POST':
+    if request.method == 'POST':  # <== Aqui estava o erro
         preferencias = request.form.getlist('preferencia')
         if preferencias:
             for i, candidato_id in enumerate(preferencias):
@@ -142,9 +116,6 @@ def votar():
 @app.route('/resultado')
 def resultado():
     conn = get_db_connection()
-    if conn is None:
-        return "Erro ao conectar ao banco de dados.", 500
-
     cursor = conn.cursor()
 
     # Obter o total de candidatos
