@@ -1,6 +1,6 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
-import os
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -147,5 +147,4 @@ def resultado():
 # Inicialização do servidor Flask
 if __name__ == '__main__':
     criar_banco_de_dados()  # Recriar o banco de dados ao iniciar o servidor
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Captura a por
