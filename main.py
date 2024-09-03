@@ -100,7 +100,7 @@ def votar():
     cursor.execute("SELECT * FROM candidatos")
     candidatos = cursor.fetchall()
 
-    if request.method == 'POST':  # <== Aqui estava o erro
+    if request.method == 'POST':
         preferencias = request.form.getlist('preferencia')
         if preferencias:
             for i, candidato_id in enumerate(preferencias):
@@ -143,6 +143,34 @@ def resultado():
 
     conn.close()
     return render_template('resultado.html', resultados=resultados_com_porcentagem, tpm=tpm)
+
+# Página de resultados Minimax
+@app.route('/resultado_minimax')
+def resultado_minimax():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Obter o total de eleitores (ou seja, o número de eleitores distintos)
+    cursor.execute('SELECT COUNT(DISTINCT id) FROM votos')
+    total_eleitores = cursor.fetchone()[0]
+
+    # Obter a soma das preferências de cada candidato
+    cursor.execute('''
+        SELECT candidatos.nome, SUM(votos.preferencia) AS total_preferencia
+        FROM votos
+        JOIN candidatos ON votos.candidato_id = candidatos.id
+        GROUP BY candidatos.id
+    ''')
+    resultados = cursor.fetchall()
+
+    # Calcular a porcentagem (RF%) para cada candidato
+    resultados_com_porcentagem = [
+        (resultado[0], resultado[1], (resultado[1] / total_eleitores) * 100 if total_eleitores > 0 else 0)
+        for resultado in resultados
+    ]
+
+    conn.close()
+    return render_template('resultado_minimax.html', resultados=resultados_com_porcentagem, total_eleitores=total_eleitores)
 
 # Inicialização do servidor Flask
 if __name__ == '__main__':
