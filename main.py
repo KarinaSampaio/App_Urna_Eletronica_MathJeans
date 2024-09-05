@@ -102,7 +102,9 @@ def votar():
 
     if request.method == 'POST':
         preferencias = request.form.getlist('preferencia')
-        if preferencias:
+        if len(preferencias) != 3:
+            flash('Você deve selecionar exatamente 3 preferências.', 'danger')
+        else:
             for i, candidato_id in enumerate(preferencias):
                 cursor.execute('INSERT INTO votos (candidato_id, preferencia) VALUES (?, ?)', (candidato_id, i + 1))
             conn.commit()
@@ -111,6 +113,7 @@ def votar():
 
     conn.close()
     return render_template('votar.html', candidatos=candidatos)
+
 
 # Página de resultados
 @app.route('/resultado')
