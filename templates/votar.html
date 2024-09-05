@@ -10,9 +10,9 @@
     <div class="container">
         <h1>Votação</h1>
         <form method="POST" action="{{ url_for('votar') }}">
-            <p>Classifique os candidatos em ordem de preferência (1º ao 5º lugar):</p>
+            <p>Classifique os candidatos em ordem de preferência (1º ao 3º lugar):</p>
             <ul>
-                {% for i in range(1, 6) %}
+                {% for i in range(1, 4) %}
                 <li>
                     <label for="preferencia_{{ i }}">Preferência {{ i }}:</label>
                     <select name="preferencia" id="preferencia_{{ i }}" required>
