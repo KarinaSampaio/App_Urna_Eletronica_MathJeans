@@ -10,6 +10,10 @@ def criar_banco_de_dados():
     conn = sqlite3.connect('urna_eletronica.db')
     cursor = conn.cursor()
 
+    # Excluir tabelas existentes (para resetar o banco)
+    cursor.execute('DROP TABLE IF EXISTS votos')
+    cursor.execute('DROP TABLE IF EXISTS candidatos')
+
     # Criação da tabela de candidatos
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS candidatos (
@@ -114,7 +118,6 @@ def votar():
     conn.close()
     return render_template('votar.html', candidatos=candidatos)
 
-
 # Página de resultados
 @app.route('/resultado')
 def resultado():
@@ -174,6 +177,21 @@ def resultado_minimax():
 
     conn.close()
     return render_template('resultado_minimax.html', resultados=resultados_com_porcentagem, total_eleitores=total_eleitores)
+
+# Rota para resetar o banco de dados (zerar todos os dados)
+@app.route('/resetar_bd', methods=['POST'])
+def resetar_bd():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Excluir todos os votos e candidatos
+    cursor.execute('DELETE FROM votos')
+    cursor.execute('DELETE FROM candidatos')
+    conn.commit()
+    conn.close()
+
+    flash('Banco de dados resetado com sucesso!', 'success')
+    return redirect(url_for('index'))
 
 # Inicialização do servidor Flask
 if __name__ == '__main__':
