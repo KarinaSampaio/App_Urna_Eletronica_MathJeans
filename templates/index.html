@@ -14,8 +14,23 @@
             <li><a href="{{ url_for('votar') }}">Votar</a></li>
             <li><a href="{{ url_for('resultado') }}">Ver Resultado</a></li>
             <li><a href="{{ url_for('resultado_minimax') }}">Ver Resultado Minimax</a></li>
+            <li>
+                <form action="{{ url_for('resetar_bd') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja resetar o banco de dados?');">
+                    <button type="submit">Resetar Banco de Dados</button>
+                </form>
+            </li>
         </ul>
         <footer>&copy; 2024 - Urna Eletrônica</footer>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
     </div>
 </body>
 </html>
