@@ -11,19 +11,30 @@
         <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
         <h1>Votação</h1>
         <form method="POST" action="{{ url_for('votar') }}">
-            <p>Classifique os candidatos em ordem de preferência (1º ao 3º lugar):</p>
-            <ul>
-                {% for i in range(1, 4) %}
-                <li>
-                    <label for="preferencia_{{ i }}">Preferência {{ i }}:</label>
-                    <select name="preferencia" id="preferencia_{{ i }}" required>
-                        {% for candidato in candidatos %}
-                        <option value="{{ candidato[0] }}">{{ candidato[1] }}</option>
-                        {% endfor %}
-                    </select>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class="form-group">
+                <label for="preferencia1">Preferência 1:</label>
+                <select name="preferencia" id="preferencia1" required>
+                    {% for candidato in candidatos %}
+                    <option value="{{ candidato.id }}">{{ candidato.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="preferencia2">Preferência 2:</label>
+                <select name="preferencia" id="preferencia2" required>
+                    {% for candidato in candidatos %}
+                    <option value="{{ candidato.id }}">{{ candidato.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="preferencia3">Preferência 3:</label>
+                <select name="preferencia" id="preferencia3" required>
+                    {% for candidato in candidatos %}
+                    <option value="{{ candidato.id }}">{{ candidato.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <button type="submit" class="btn">Votar</button>
         </form>
     </div>
