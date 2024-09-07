@@ -1,20 +1,45 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
 from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = "chave-secreta"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///eleicoes.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Simulação de banco de dados em memória para eleitores, candidatos e votos
-eleitores = []
-candidatos = []
-votos = defaultdict(list)  # Cada candidato terá uma lista com as contagens de votos em diferentes rodadas
+db = SQLAlchemy(app)
 
+# Modelo para o banco de dados
+class Eleitor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    titulo = db.Column(db.String(20), unique=True, nullable=False)
+
+class Candidato(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+
+class Voto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    eleitor_id = db.Column(db.Integer, db.ForeignKey('eleitor.id'), nullable=False)
+    candidato_id = db.Column(db.Integer, db.ForeignKey('candidato.id'), nullable=False)
+    preferencia = db.Column(db.Integer, nullable=False)
+
+with app.app_context():
+    db.create_all()
+
+    # Inserir candidatos automaticamente se não existirem
+    if Candidato.query.count() == 0:
+        candidatos_iniciais = ['Ronaldo', 'Filipe', 'Paulo', 'Ester', 'Nathália']
+        for nome in candidatos_iniciais:
+            novo_candidato = Candidato(nome=nome)
+            db.session.add(novo_candidato)
+        db.session.commit()
 
 @app.route('/')
 def index():
     """Página inicial com opções para cadastro de eleitor, votação e resultados."""
     return render_template('index.html')
-
 
 @app.route('/cadastrar_eleitor', methods=['GET', 'POST'])
 def cadastrar_eleitor():
@@ -29,13 +54,19 @@ def cadastrar_eleitor():
             return redirect(url_for('cadastrar_eleitor'))
 
         # Verifica se o eleitor já foi cadastrado
-        for eleitor in eleitores:
-            if eleitor['titulo'] == titulo_eleitor:
-                flash("Este eleitor já foi cadastrado.", "danger")
-                return redirect(url_for('cadastrar_eleitor'))
+        eleitor_existente = Eleitor.query.filter_by(titulo=titulo_eleitor).first()
+        if eleitor_existente:
+            flash("Este eleitor já foi cadastrado.", "danger")
+            return redirect(url_for('cadastrar_eleitor'))
 
         # Cadastra o eleitor
-        eleitores.append({'nome': nome, 'titulo': titulo_eleitor})
+        novo_eleitor = Eleitor(nome=nome, titulo=titulo_eleitor)
+        db.session.add(novo_eleitor)
+        db.session.commit()
+
+        # Armazena o ID do eleitor na sessão
+        session['eleitor_id'] = novo_eleitor.id
+
         flash("Eleitor cadastrado com sucesso!", "success")
 
         # Redireciona para a página de votação
@@ -43,127 +74,104 @@ def cadastrar_eleitor():
 
     return render_template('pagina_inicial.html')
 
-
-@app.route('/cadastrar', methods=['GET', 'POST'])
-def cadastrar():
+@app.route('/cadastrar_candidato', methods=['GET', 'POST'])
+def cadastrar_candidato():
     """Página de cadastro de candidatos."""
     if request.method == 'POST':
         nome_candidato = request.form['nome_candidato']
 
         # Verifica se o candidato já existe
-        for candidato in candidatos:
-            if candidato == nome_candidato:
-                flash("Candidato já cadastrado!", "danger")
-                return redirect(url_for('cadastrar'))
+        candidato_existente = Candidato.query.filter_by(nome=nome_candidato).first()
+        if candidato_existente:
+            flash("Candidato já cadastrado!", "danger")
+            return redirect(url_for('cadastrar_candidato'))
 
         # Cadastra o candidato
-        candidatos.append(nome_candidato)
+        novo_candidato = Candidato(nome=nome_candidato)
+        db.session.add(novo_candidato)
+        db.session.commit()
         flash("Candidato cadastrado com sucesso!", "success")
-        return redirect(url_for('cadastrar'))
+        return redirect(url_for('cadastrar_candidato'))
 
+    candidatos = Candidato.query.all()
     return render_template('cadastrar.html', candidatos=candidatos)
-
 
 @app.route('/votar', methods=['GET', 'POST'])
 def votar():
     """Página de votação onde o eleitor vota e, em seguida, é redirecionado para a página de agradecimento."""
+    candidatos = Candidato.query.all()
+    eleitor_id = session.get('eleitor_id')  # Recupera o ID do eleitor da sessão
+
+    if not eleitor_id:
+        flash("Você precisa se cadastrar antes de votar.", "danger")
+        return redirect(url_for('cadastrar_eleitor'))
+
     if request.method == 'POST':
         preferencias = request.form.getlist('preferencia')
 
         # Registrar os votos de acordo com as preferências
         for i, candidato_id in enumerate(preferencias):
-            votos[int(candidato_id)].append(i + 1)  # i+1 define a ordem de preferência
+            voto = Voto(eleitor_id=eleitor_id, candidato_id=candidato_id, preferencia=i + 1)
+            db.session.add(voto)
+            db.session.commit()
 
         flash("Voto registrado com sucesso!", "success")
         return redirect(url_for('agradecimento'))  # Redirecionar para a página de agradecimento
 
-    return render_template('votar.html', candidatos=enumerate(candidatos))
-
+    return render_template('votar.html', candidatos=candidatos)
 
 @app.route('/agradecimento')
 def agradecimento():
     """Página de agradecimento após a votação."""
     return render_template('agradecimento.html')
 
-
 @app.route('/resultado')
 def resultado():
     """Exibe o resultado tradicional da votação."""
-    resultados = calcular_resultados(votos)
-
-    # Se não houver candidatos, adicionamos uma mensagem de aviso
-    if not candidatos:
-        flash("Nenhum candidato cadastrado ainda.", "danger")
-        return render_template('resultado.html', resultados=[], votos_registrados=False)
-
-    # Exibe a página de resultados mesmo que não haja votos
-    return render_template('resultado.html', resultados=resultados, votos_registrados=bool(votos))
-
+    resultados = calcular_resultados()
+    return render_template('resultado.html', resultados=resultados)
 
 @app.route('/resultado_minimax')
 def resultado_minimax():
     """Exibe o resultado minimax da votação."""
-    total_eleitores = len(eleitores)  # Calcula o total de eleitores
-    resultados = calcular_minimax(votos)
-
-    # Se não houver candidatos, adicionamos uma mensagem de aviso
-    if not candidatos:
-        flash("Nenhum candidato cadastrado ainda.", "danger")
-        return render_template('resultado_minimax.html', resultados=[], total_eleitores=total_eleitores,
-                               votos_registrados=False)
-
-    # Exibe a página de resultados mesmo que não haja votos
-    return render_template('resultado_minimax.html', resultados=resultados, total_eleitores=total_eleitores,
-                           votos_registrados=bool(votos))
-
+    resultados = calcular_minimax()
+    return render_template('resultado_minimax.html', resultados=resultados)
 
 @app.route('/resetar_bd', methods=['POST'])
 def resetar_bd():
     """Reseta o banco de dados, excluindo todos os eleitores e votos."""
-    global eleitores, candidatos, votos
-    eleitores = []
-    candidatos = []
-    votos = defaultdict(list)
+    db.drop_all()
+    db.create_all()
     flash("Banco de dados resetado com sucesso!", "success")
     return redirect(url_for('index'))
 
-
-def calcular_resultados(votos):
+def calcular_resultados():
     """Calcula o resultado tradicional com base nos votos."""
     total_pontos = defaultdict(int)
 
-    for candidato_id, candidato_votos in votos.items():
-        total_pontos[candidato_id] = sum(candidato_votos)
+    votos = Voto.query.all()
+    for voto in votos:
+        total_pontos[voto.candidato_id] += 4 - voto.preferencia
 
     total = sum(total_pontos.values())
-    if total == 0:
-        # Retorna uma lista com todos os candidatos, mas com pontuação 0
-        return [(candidatos[candidato_id], 0, 0) for candidato_id in range(len(candidatos))]
-
-    resultados = [(candidatos[candidato_id], pontos, (pontos / total) * 100 if total > 0 else 0)
+    resultados = [(Candidato.query.get(candidato_id).nome, pontos, (pontos / total) * 100 if total > 0 else 0)
                   for candidato_id, pontos in total_pontos.items()]
 
     return sorted(resultados, key=lambda x: -x[1])  # Ordena os resultados por pontos
 
-
-def calcular_minimax(votos):
+def calcular_minimax():
     """Calcula o resultado minimax com a fórmula voto/n * 100."""
     total_pontos = defaultdict(list)
 
-    for candidato_id, candidato_votos in votos.items():
-        for i, voto in enumerate(candidato_votos):
-            percentagem = (voto / (i + 1)) * 100  # Fórmula ajustada
-            total_pontos[candidato_id].append(percentagem)
+    votos = Voto.query.all()
+    for voto in votos:
+        percentagem = (4 - voto.preferencia) / 4 * 100
+        total_pontos[voto.candidato_id].append(percentagem)
 
-    if not total_pontos:
-        # Retorna uma lista com todos os candidatos, mas com pontuação 0
-        return [(candidatos[candidato_id], 0, 0) for candidato_id in range(len(candidatos))]
-
-    resultados = [(candidatos[candidato_id], sum(pontos), sum(pontos) / len(pontos) if pontos else 0)
+    resultados = [(Candidato.query.get(candidato_id).nome, sum(pontos), sum(pontos) / len(pontos) if pontos else 0)
                   for candidato_id, pontos in total_pontos.items()]
 
     return sorted(resultados, key=lambda x: -x[1])  # Ordena os resultados por pontuação
-
 
 if __name__ == '__main__':
     app.run(debug=True)
