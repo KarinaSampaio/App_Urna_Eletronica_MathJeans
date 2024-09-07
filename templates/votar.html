@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Votação</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style_urna.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_urna.css') }}">
 </head>
 <body>
     <div class="container">
+        <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
         <h1>Votação</h1>
         <form method="POST" action="{{ url_for('votar') }}">
             <p>Classifique os candidatos em ordem de preferência (1º ao 3º lugar):</p>
@@ -23,20 +24,8 @@
                 </li>
                 {% endfor %}
             </ul>
-            <button type="submit">Votar</button>
+            <button type="submit" class="btn">Votar</button>
         </form>
-
-        <a href="{{ url_for('index') }}">Voltar ao Início</a>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-            {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-        {% endwith %}
     </div>
 </body>
 </html>
