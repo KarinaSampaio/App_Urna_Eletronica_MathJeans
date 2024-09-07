@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contagem de Votos por Preferência</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_urna.css') }}">
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
+        <h1>Contagem de Votos</h1>
+
+        <table class="tabela-votos">
+            <thead>
+                <tr>
+                    <th>Candidato</th>
+                    <th>1ª Preferência</th>
+                    <th>2ª Preferência</th>
+                    <th>3ª Preferência</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidato, preferencias in contagem_preferencias.items() %}
+                <tr>
+                    <td>{{ candidato }}</td>
+                    <td>{{ preferencias[1] }}</td>
+                    <td>{{ preferencias[2] }}</td>
+                    <td>{{ preferencias[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ url_for('index') }}" class="btn">Voltar ao Início</a>
+    </div>
+</body>
+</html>
