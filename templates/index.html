@@ -10,16 +10,17 @@
     <div class="container">
         <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
         <h1>Bem-vindo à Urna Eletrônica</h1>
-        <p class="options">
-            <a href="{{ url_for('cadastrar_eleitor') }}" target="_blank">Cadastrar Eleitor</a>
-            <a href="{{ url_for('cadastrar') }}">Cadastrar Candidatos</a>
-            <a href="{{ url_for('votar') }}">Votar</a>
-            <a href="{{ url_for('resultado') }}">Ver Resultado</a>
-            <a href="{{ url_for('resultado_minimax') }}">Ver Resultado Minimax</a>
-        </p>
-        <form action="{{ url_for('resetar_bd') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja resetar o banco de dados?');">
-            <button type="submit" class="btn">Resetar Banco de Dados</button>
-        </form>
+        <div class="options">
+            <a href="{{ url_for('cadastrar_eleitor') }}" class="btn">Cadastrar Eleitor</a>
+            <a href="{{ url_for('cadastrar_candidato') }}" class="btn">Cadastrar Candidatos</a>
+            <a href="{{ url_for('votar') }}" class="btn">Votar</a>
+            <a href="{{ url_for('resultado') }}" class="btn">Ver Resultado</a>
+            <a href="{{ url_for('resultado_minimax') }}" class="btn">Ver Resultado Minimax</a>
+            <form action="{{ url_for('resetar_bd') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja resetar o banco de dados?');">
+                <button type="submit" class="btn">Resetar Banco de Dados</button>
+            </form>
+        </div>
+        <footer>&copy; 2024 - Urna Eletrônica</footer>
     </div>
 </body>
 </html>
