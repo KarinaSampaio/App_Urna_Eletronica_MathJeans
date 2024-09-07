@@ -10,7 +10,7 @@
     <div class="container">
         <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
         <h1>Cadastro de Candidatos</h1>
-        <form method="POST" action="{{ url_for('cadastrar') }}">
+        <form method="POST" action="{{ url_for('cadastrar_candidato') }}">
             <label for="nome_candidato">Nome do Candidato:</label>
             <input type="text" name="nome_candidato" id="nome_candidato" required>
 
