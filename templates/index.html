@@ -10,17 +10,18 @@
     <div class="container">
         <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
         <h1>Bem-vindo à Urna Eletrônica</h1>
-        <div class="options">
-            <a href="{{ url_for('cadastrar_eleitor') }}" class="btn">Cadastrar Eleitor</a>
-            <a href="{{ url_for('cadastrar_candidato') }}" class="btn">Cadastrar Candidatos</a>
-            <a href="{{ url_for('votar') }}" class="btn">Votar</a>
-            <a href="{{ url_for('resultado') }}" class="btn">Ver Resultado</a>
-            <a href="{{ url_for('resultado_minimax') }}" class="btn">Ver Resultado Minimax</a>
-            <form action="{{ url_for('resetar_bd') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja resetar o banco de dados?');">
-                <button type="submit" class="btn">Resetar Banco de Dados</button>
-            </form>
-        </div>
-        <footer>&copy; 2024 - Urna Eletrônica</footer>
+
+        <a href="{{ url_for('cadastrar_eleitor') }}" class="btn">Cadastrar Eleitor</a>
+        <a href="{{ url_for('cadastrar_candidato') }}" class="btn">Cadastrar Candidatos</a>
+        <a href="{{ url_for('votar') }}" class="btn">Votar</a>
+        <a href="{{ url_for('resultado') }}" class="btn">Ver Resultado</a>
+        <a href="{{ url_for('resultado_minimax') }}" class="btn">Ver Resultado Minimax</a>
+        <a href="{{ url_for('contagem_votos') }}" class="btn">Ver Contagem de Votos</a> <!-- Botão novo -->
+        <form action="{{ url_for('resetar_bd') }}" method="POST">
+            <button type="submit" class="btn">Resetar Banco de Dados</button>
+        </form>
+
+        <p>© 2024 - Urna Eletrônica</p>
     </div>
 </body>
 </html>
