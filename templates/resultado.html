@@ -1,24 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultado da Votação</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style_urna.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_urna.css') }}">
 </head>
 <body>
-    <div class="container resultado-page resultados">
+    <div class="container">
+        <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
         <h1>Resultado da Votação</h1>
-
-        <p>Total de Pontos Máximos (TPM): {{ tpm }}</p>
-
-        <ul>
-            {% for resultado in resultados %}
-            <li>{{ resultado[0] }}: {{ resultado[1] }} pontos ({{ '%.2f' % resultado[2] }}%)</li>
-            {% endfor %}
-        </ul>
-
-        <a href="{{ url_for('index') }}">Voltar ao Início</a>
+        <div class="result">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Candidato</th>
+                        <th>Pontos</th>
+                        <th>Percentual (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resultado in resultados %}
+                    <tr>
+                        <td>{{ resultado[0] }}</td>
+                        <td>{{ resultado[1] }}</td>
+                        <td>{{ '%.2f' % resultado[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{{ url_for('index') }}" class="btn">Voltar ao Início</a>
     </div>
 </body>
 </html>
