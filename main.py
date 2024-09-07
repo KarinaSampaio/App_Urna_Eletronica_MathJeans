@@ -9,21 +9,25 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+
 # Modelo para o banco de dados
 class Eleitor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     titulo = db.Column(db.String(20), unique=True, nullable=False)
 
+
 class Candidato(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
+
 
 class Voto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     eleitor_id = db.Column(db.Integer, db.ForeignKey('eleitor.id'), nullable=False)
     candidato_id = db.Column(db.Integer, db.ForeignKey('candidato.id'), nullable=False)
     preferencia = db.Column(db.Integer, nullable=False)
+
 
 with app.app_context():
     db.create_all()
@@ -36,10 +40,12 @@ with app.app_context():
             db.session.add(novo_candidato)
         db.session.commit()
 
+
 @app.route('/')
 def index():
     """Página inicial com opções para cadastro de eleitor, votação e resultados."""
     return render_template('index.html')
+
 
 @app.route('/cadastrar_eleitor', methods=['GET', 'POST'])
 def cadastrar_eleitor():
@@ -74,6 +80,7 @@ def cadastrar_eleitor():
 
     return render_template('pagina_inicial.html')
 
+
 @app.route('/cadastrar_candidato', methods=['GET', 'POST'])
 def cadastrar_candidato():
     """Página de cadastro de candidatos."""
@@ -95,6 +102,7 @@ def cadastrar_candidato():
 
     candidatos = Candidato.query.all()
     return render_template('cadastrar.html', candidatos=candidatos)
+
 
 @app.route('/votar', methods=['GET', 'POST'])
 def votar():
@@ -120,10 +128,12 @@ def votar():
 
     return render_template('votar.html', candidatos=candidatos)
 
+
 @app.route('/agradecimento')
 def agradecimento():
     """Página de agradecimento após a votação."""
     return render_template('agradecimento.html')
+
 
 @app.route('/resultado')
 def resultado():
@@ -131,11 +141,29 @@ def resultado():
     resultados = calcular_resultados()
     return render_template('resultado.html', resultados=resultados)
 
+
 @app.route('/resultado_minimax')
 def resultado_minimax():
     """Exibe o resultado minimax da votação."""
     resultados = calcular_minimax()
     return render_template('resultado_minimax.html', resultados=resultados)
+
+
+@app.route('/contagem_votos')
+def contagem_votos():
+    """Exibe a contagem de votos por preferências em uma tabela."""
+    contagem_preferencias = defaultdict(lambda: {1: 0, 2: 0, 3: 0})  # Contagem por preferência
+
+    # Obter todos os votos
+    votos = Voto.query.all()
+
+    for voto in votos:
+        candidato = Candidato.query.get(voto.candidato_id)
+        if candidato:
+            contagem_preferencias[candidato.nome][voto.preferencia] += 1
+
+    return render_template('contagem_votos.html', contagem_preferencias=contagem_preferencias)
+
 
 @app.route('/resetar_bd', methods=['POST'])
 def resetar_bd():
@@ -144,6 +172,7 @@ def resetar_bd():
     db.create_all()
     flash("Banco de dados resetado com sucesso!", "success")
     return redirect(url_for('index'))
+
 
 def calcular_resultados():
     """Calcula o resultado tradicional com base nos votos."""
@@ -159,6 +188,7 @@ def calcular_resultados():
 
     return sorted(resultados, key=lambda x: -x[1])  # Ordena os resultados por pontos
 
+
 def calcular_minimax():
     """Calcula o resultado minimax com a fórmula voto/n * 100."""
     total_pontos = defaultdict(list)
@@ -172,6 +202,7 @@ def calcular_minimax():
                   for candidato_id, pontos in total_pontos.items()]
 
     return sorted(resultados, key=lambda x: -x[1])  # Ordena os resultados por pontuação
+
 
 if __name__ == '__main__':
     app.run(debug=True)
