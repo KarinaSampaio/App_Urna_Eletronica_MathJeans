@@ -16,7 +16,7 @@
         <a href="{{ url_for('votar') }}" class="btn">Votar</a>
         <a href="{{ url_for('resultado') }}" class="btn">Ver Resultado</a>
         <a href="{{ url_for('resultado_minimax') }}" class="btn">Ver Resultado Minimax</a>
-        <a href="{{ url_for('contagem_votos') }}" class="btn">Ver Contagem de Votos</a> <!-- Botão novo -->
+        <a href="{{ url_for('contagem_votos') }}" class="btn">Ver Contagem de Votos</a> <!-- Botão para contagem de votos -->
         <form action="{{ url_for('resetar_bd') }}" method="POST">
             <button type="submit" class="btn">Resetar Banco de Dados</button>
         </form>
