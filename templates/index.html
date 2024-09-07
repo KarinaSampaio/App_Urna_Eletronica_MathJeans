@@ -1,36 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Urna Eletrônica</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style_urna.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_urna.css') }}">
 </head>
 <body>
     <div class="container">
+        <img src="{{ url_for('static', filename='images/logo.jfif') }}" alt="Logo Urna Eletrônica" class="logo-small">
         <h1>Bem-vindo à Urna Eletrônica</h1>
-        <ul>
-            <li><a href="{{ url_for('cadastrar') }}">Cadastrar Candidato</a></li>
-            <li><a href="{{ url_for('votar') }}">Votar</a></li>
-            <li><a href="{{ url_for('resultado') }}">Ver Resultado</a></li>
-            <li><a href="{{ url_for('resultado_minimax') }}">Ver Resultado Minimax</a></li>
-            <li>
-                <form action="{{ url_for('resetar_bd') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja resetar o banco de dados?');">
-                    <button type="submit">Resetar Banco de Dados</button>
-                </form>
-            </li>
-        </ul>
-        <footer>&copy; 2024 - Urna Eletrônica</footer>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-            {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-        {% endwith %}
+        <p class="options">
+            <a href="{{ url_for('cadastrar_eleitor') }}" target="_blank">Cadastrar Eleitor</a>
+            <a href="{{ url_for('cadastrar') }}">Cadastrar Candidatos</a>
+            <a href="{{ url_for('votar') }}">Votar</a>
+            <a href="{{ url_for('resultado') }}">Ver Resultado</a>
+            <a href="{{ url_for('resultado_minimax') }}">Ver Resultado Minimax</a>
+        </p>
+        <form action="{{ url_for('resetar_bd') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja resetar o banco de dados?');">
+            <button type="submit" class="btn">Resetar Banco de Dados</button>
+        </form>
     </div>
 </body>
 </html>
